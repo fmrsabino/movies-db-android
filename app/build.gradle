@@ -1,0 +1,102 @@
+apply plugin: 'com.android.application'
+apply plugin: 'me.tatarka.retrolambda'
+apply plugin: 'com.neenbedankt.android-apt'
+
+android {
+    compileSdkVersion 24
+    buildToolsVersion "24.0.2"
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    defaultConfig {
+        applicationId "fmrsabino.moviesdb"
+        minSdkVersion 16
+        targetSdkVersion 24
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+
+dependencies {
+    final SUPPORT_LIB_VERSION = '24.2.1'
+
+    final TIMBER_VERSION = '4.3.0'
+    final BUTTER_KNIFE_VERSION = '8.3.0'
+    final RETROFIT_VERSION = '2.1.0'
+    final RX_JAVA = '1.1.6'
+    final RX_ANDROID = '1.2.1'
+    final AUTO_VALUE_VERSION = '1.2'
+    final AUTO_VALUE_PARCEL = '0.2.4-rc2'
+    final AUTO_VALUE_MOSHI_VERSION = '0.4.0-rc2'
+    final DAGGER_VERSION = '2.6.1'
+    final ESPRESSO_VERSION = '2.2.2'
+
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+
+
+    compile "com.android.support:appcompat-v7:$SUPPORT_LIB_VERSION"
+    compile "com.android.support:recyclerview-v7:$SUPPORT_LIB_VERSION"
+
+    compile "com.jakewharton.timber:timber:$TIMBER_VERSION"
+
+    compile "com.jakewharton:butterknife:$BUTTER_KNIFE_VERSION"
+    apt     "com.jakewharton:butterknife-compiler:$BUTTER_KNIFE_VERSION"
+
+    //Retrofit
+    compile "com.squareup.retrofit2:retrofit:$RETROFIT_VERSION"
+    compile "com.squareup.retrofit2:converter-moshi:$RETROFIT_VERSION"
+    compile "com.squareup.retrofit2:adapter-rxjava:$RETROFIT_VERSION"
+
+    //Rx
+    compile "io.reactivex:rxandroid:$RX_ANDROID"
+    compile "io.reactivex:rxjava:$RX_JAVA"
+
+    //AutoValue
+    compile  "com.google.auto.value:auto-value:$AUTO_VALUE_VERSION"
+    apt      "com.google.auto.value:auto-value:$AUTO_VALUE_VERSION"
+    apt      "com.ryanharter.auto.value:auto-value-parcel:$AUTO_VALUE_PARCEL"
+    compile  "com.ryanharter.auto.value:auto-value-parcel-adapter:$AUTO_VALUE_PARCEL"
+    apt      "com.ryanharter.auto.value:auto-value-moshi:$AUTO_VALUE_MOSHI_VERSION"
+    provided "com.ryanharter.auto.value:auto-value-moshi:$AUTO_VALUE_MOSHI_VERSION"
+
+    //Dependency Injection
+    compile "com.google.dagger:dagger:$DAGGER_VERSION"
+    apt     "com.google.dagger:dagger-compiler:$DAGGER_VERSION"
+    testApt "com.google.dagger:dagger-compiler:$DAGGER_VERSION"
+    androidTestApt "com.google.dagger:dagger-compiler:$DAGGER_VERSION"
+
+    compile 'com.squareup.sqlbrite:sqlbrite:0.7.0'
+    compile 'com.annimon:stream:1.1.2'
+    compile 'com.squareup.picasso:picasso:2.5.2'
+    compile 'net.danlew:android.joda:2.9.4.1'
+
+    //Unit
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.mockito:mockito-core:1.10.19'
+    testCompile "org.robolectric:robolectric:3.1.2"
+
+    //Instrumentation
+    androidTestCompile 'junit:junit:4.12'
+    androidTestCompile 'org.mockito:mockito-core:1.10.19'
+    androidTestCompile "com.android.support:support-annotations:$SUPPORT_LIB_VERSION"
+    androidTestCompile "com.android.support.test.espresso:espresso-core:$ESPRESSO_VERSION"
+    androidTestCompile ("com.android.support.test.espresso:espresso-contrib:$ESPRESSO_VERSION") {
+        exclude group: 'com.android.support', module: 'design'
+        exclude group: 'com.android.support', module: 'recyclerview-v7'
+        exclude group: 'com.android.support', module: 'support-v4'
+    }
+    androidTestCompile ('com.android.support.test:runner:0.5')
+}
