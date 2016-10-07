@@ -13,7 +13,6 @@ import fmrsabino.moviesdb.injection.scope.ApplicationContext;
 @Singleton
 @Component(modules = ApplicationModule.class)
 public interface ApplicationComponent {
-
     Application application();
     @ApplicationContext Context context();
     DataManager dataManager();
