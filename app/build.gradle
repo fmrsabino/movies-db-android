@@ -43,6 +43,7 @@ dependencies {
     final AUTO_VALUE_MOSHI_VERSION = '0.4.0-rc2'
     final DAGGER_VERSION = '2.6.1'
     final ESPRESSO_VERSION = '2.2.2'
+    final RX_BINDING_VERSION = '0.4.0'
 
     compile fileTree(dir: 'libs', include: ['*.jar'])
 
@@ -54,6 +55,8 @@ dependencies {
 
     compile "com.jakewharton:butterknife:$BUTTER_KNIFE_VERSION"
     apt     "com.jakewharton:butterknife-compiler:$BUTTER_KNIFE_VERSION"
+
+    compile "com.jakewharton.rxbinding:rxbinding:$RX_BINDING_VERSION"
 
     //Retrofit
     compile "com.squareup.retrofit2:retrofit:$RETROFIT_VERSION"

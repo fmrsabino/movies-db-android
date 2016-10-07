@@ -8,6 +8,8 @@ import android.support.v7.widget.RecyclerView;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.jakewharton.rxbinding.view.RxView;
+
 import javax.inject.Inject;
 
 import butterknife.BindView;
@@ -17,6 +19,8 @@ import fmrsabino.moviesdb.data.DataManager;
 import fmrsabino.moviesdb.data.model.search.Search;
 import fmrsabino.moviesdb.ui.base.BaseActivity;
 import fmrsabino.moviesdb.ui.base.PresenterLoader;
+import fmrsabino.moviesdb.util.RxUtil;
+import rx.Subscription;
 import timber.log.Timber;
 
 public class MainActivity extends BaseActivity implements MainMvpView, LoaderManager.LoaderCallbacks<MainPresenter> {
@@ -27,6 +31,8 @@ public class MainActivity extends BaseActivity implements MainMvpView, LoaderMan
     @BindView(R.id.activity_main_list) RecyclerView recyclerView;
     @BindView(R.id.activity_main_search_text) EditText searchField;
     @BindView(R.id.activity_main_button) Button button;
+
+    private Subscription buttonOnClick;
 
     //Loader Callbacks
     @Override
@@ -62,7 +68,14 @@ public class MainActivity extends BaseActivity implements MainMvpView, LoaderMan
     protected void onResume() {
         super.onResume();
         presenter.getSearch(searchField.getText().toString());
-        button.setOnClickListener(view -> presenter.getSearch(searchField.getText().toString()));
+        buttonOnClick = RxView.clicks(button).subscribe(aVoid ->
+                presenter.getSearch(searchField.getText().toString()));
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        RxUtil.unsubscribe(buttonOnClick);
     }
 
     @Override

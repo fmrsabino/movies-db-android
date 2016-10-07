@@ -40,10 +40,7 @@ public class DataManager {
     }
 
     public Observable<Image> observeImage() {
-        if (!databaseHelper.hasImage()) {
-            syncImage().subscribe(image -> {}, Throwable::printStackTrace);
-        }
-        return databaseHelper.observeImage();
+        return databaseHelper.hasImage() ? databaseHelper.observeImage() : syncImage();
     }
 
     public Observable<Movie> syncMovie(final int id) {
