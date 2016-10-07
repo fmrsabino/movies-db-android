@@ -54,6 +54,12 @@ public class MainPresenter implements Presenter<MainMvpView> {
 
     public void loadPosterImageUrl() {
         RxUtil.unsubscribe(imageSubscription);
+        if (!dataManager.hasImage()) {
+            dataManager.syncImage()
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeOn(Schedulers.io())
+                    .subscribe(image -> {}, Throwable::printStackTrace);
+        }
         imageSubscription = dataManager.observeImage()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
