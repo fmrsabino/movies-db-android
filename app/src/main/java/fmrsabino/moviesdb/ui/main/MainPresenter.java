@@ -34,7 +34,6 @@ public class MainPresenter implements Presenter<MainMvpView> {
     @Inject
     public MainPresenter(DataManager dataManager) {
         this.dataManager = dataManager;
-        loadPosterImageUrl();
     }
 
     @Override

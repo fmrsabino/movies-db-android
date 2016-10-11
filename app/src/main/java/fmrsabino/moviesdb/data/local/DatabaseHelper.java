@@ -27,18 +27,18 @@ public class DatabaseHelper {
     }
 
     public Observable<Image> setImage(final Image newImage) {
-        return Observable.create(subscriber -> {
-            if (subscriber.isUnsubscribed()) { return; }
-            BriteDatabase.Transaction transaction = db.newTransaction();
+        BriteDatabase.Transaction transaction = db.newTransaction();
+        long result;
+        try {
             db.delete(ImageTable.TABLE_NAME, null);
-            long result = db.insert(ImageTable.TABLE_NAME,
+            result = db.insert(ImageTable.TABLE_NAME,
                     ImageTable.toContentValues(newImage),
                     SQLiteDatabase.CONFLICT_REPLACE);
-            if (result >= 0) { subscriber.onNext(newImage); }
             transaction.markSuccessful();
-            subscriber.onCompleted();
+        } finally {
             transaction.end();
-        });
+        }
+        return result >= 0 ? Observable.just(newImage) : Observable.empty();
     }
 
 
