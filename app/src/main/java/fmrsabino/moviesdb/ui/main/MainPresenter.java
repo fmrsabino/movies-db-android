@@ -13,10 +13,10 @@ import javax.inject.Inject;
 import fmrsabino.moviesdb.data.DataManager;
 import fmrsabino.moviesdb.data.model.search.Search;
 import fmrsabino.moviesdb.ui.base.Presenter;
-import fmrsabino.moviesdb.util.RxUtil;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 
 public class MainPresenter implements Presenter<MainMvpView> {
@@ -27,9 +27,7 @@ public class MainPresenter implements Presenter<MainMvpView> {
     private Search searchResults;
     private String previousQuery;
 
-    private Subscription imageSubscription;
-    private Subscription searchSubscription;
-
+    private CompositeSubscription subscriptions = new CompositeSubscription();
 
     @Inject
     public MainPresenter(DataManager dataManager) {
@@ -44,22 +42,24 @@ public class MainPresenter implements Presenter<MainMvpView> {
     @Override
     public void onViewDetached() {
         this.view = null;
-        RxUtil.unsubscribe(imageSubscription);
-        RxUtil.unsubscribe(searchSubscription);
+        subscriptions.clear();
     }
 
     @Override
     public void onDestroyed() {}
 
     public void loadPosterImageUrl() {
-        RxUtil.unsubscribe(imageSubscription);
         if (!dataManager.hasImage()) {
             dataManager.syncImage()
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeOn(Schedulers.io())
                     .subscribe(image -> {}, Throwable::printStackTrace);
         }
-        imageSubscription = dataManager.observeImage()
+        subscriptions.add(observeDbImage());
+    }
+
+    private Subscription observeDbImage() {
+        return dataManager.observeImage()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe(
@@ -85,25 +85,28 @@ public class MainPresenter implements Presenter<MainMvpView> {
             view.showSearchResults(searchResults, false);
         } else {
             Timber.i("No search done. Fetching from web");
-            RxUtil.unsubscribe(searchSubscription);
-            searchSubscription = dataManager.getRemoteSearch(s)
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeOn(Schedulers.io())
-                    .subscribe(
-                            search -> {
-                                this.searchResults = search;
-                                this.previousQuery = s;
-                                view.showSearchResults(search, true);
-                            },
-                            throwable -> {
-                                Timber.e("Error performing search");
-                                this.previousQuery = "";
-                                Search emptySearch = Search.builder().page(1).results(new ArrayList<>()).build();
-                                view.showSearchResults(emptySearch, true);
-                            },
-                            () -> {}
-                    );
+            subscriptions.add(performSearch(s));
         }
+    }
+
+    private Subscription performSearch(final String query) {
+        return dataManager.getRemoteSearch(query)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        search -> {
+                            this.searchResults = search;
+                            this.previousQuery = query;
+                            view.showSearchResults(search, true);
+                        },
+                        throwable -> {
+                            Timber.e("Error performing search");
+                            this.previousQuery = "";
+                            Search emptySearch = Search.builder().page(1).results(new ArrayList<>()).build();
+                            view.showSearchResults(emptySearch, true);
+                        },
+                        () -> {}
+                );
     }
 
     public void setPreviousQuery(String previousQuery) {
