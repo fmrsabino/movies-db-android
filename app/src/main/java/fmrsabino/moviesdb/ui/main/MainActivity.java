@@ -1,112 +1,70 @@
 package fmrsabino.moviesdb.ui.main;
 
+
 import android.os.Bundle;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.widget.Button;
-import android.widget.EditText;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.widget.FrameLayout;
 
-import com.jakewharton.rxbinding.view.RxView;
-
-import javax.inject.Inject;
+import com.roughike.bottombar.BottomBar;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import fmrsabino.moviesdb.R;
-import fmrsabino.moviesdb.data.DataManager;
-import fmrsabino.moviesdb.data.model.search.Search;
 import fmrsabino.moviesdb.ui.base.BaseActivity;
-import fmrsabino.moviesdb.ui.base.PresenterLoader;
-import fmrsabino.moviesdb.util.RxUtil;
-import rx.Subscription;
-import timber.log.Timber;
+import fmrsabino.moviesdb.ui.search.SearchFragment;
 
-public class MainActivity extends BaseActivity implements MainMvpView, LoaderManager.LoaderCallbacks<MainPresenter> {
-    @Inject DataManager dataManager;
-    @Inject MainPresenter presenter;
-    private SearchAdapter adapter;
+public class MainActivity extends BaseActivity {
+    @BindView(R.id.activity_main_container) FrameLayout container;
+    @BindView(R.id.activity_main_bottomBar) BottomBar bottomBar;
 
-    @BindView(R.id.activity_main_list) RecyclerView recyclerView;
-    @BindView(R.id.activity_main_search_text) EditText searchField;
-    @BindView(R.id.activity_main_button) Button button;
-
-    private Subscription buttonOnClick;
-
-    //Loader Callbacks
-    @Override
-    public Loader<MainPresenter> onCreateLoader(int id, Bundle args) {
-        return new PresenterLoader<>(this, () -> new MainPresenter(dataManager));
-    }
+    private int selectedTabId;
 
     @Override
-    public void onLoadFinished(Loader<MainPresenter> loader, MainPresenter presenter) {
-        Timber.d(presenter.toString());
-        this.presenter = presenter;
-    }
-
-    @Override
-    public void onLoaderReset(Loader<MainPresenter> loader) {}
-
-
-    //Lifecycle
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getSupportLoaderManager().initLoader(0, null, this);
-
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-
-        this.adapter = new SearchAdapter(this);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(adapter);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        presenter.getSearch(searchField.getText().toString());
-        buttonOnClick = RxView.clicks(button).subscribe(aVoid ->
-                presenter.getSearch(searchField.getText().toString()));
+        bottomBar.setOnTabSelectListener(tabId -> {
+            if (selectedTabId == tabId) return;
+            selectedTabId = tabId;
+            Fragment fragment = null;
+            switch (tabId) {
+                case R.id.tab_search:
+                    fragment = new SearchFragment();
+                    break;
+                case R.id.tab_favorites:
+                    break;
+            }
+            if (fragment != null) {
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                fragmentManager.beginTransaction().replace(R.id.activity_main_container, fragment)
+                        .commit();
+            }
+        });
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        RxUtil.unsubscribe(buttonOnClick);
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putInt("tabId", selectedTabId);
+        super.onSaveInstanceState(outState);
     }
 
     @Override
-    protected void onViewAttached() {
-        presenter.onViewAttached(this);
-        presenter.loadPosterImageUrl();
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        selectedTabId = savedInstanceState.getInt("tabId");
     }
 
     @Override
-    protected void onViewDetached() {
-        presenter.onViewDetached();
-    }
+    protected void onViewAttached() {}
 
     @Override
-    protected void inject() {
-        getActivityComponent().inject(this);
-    }
-
-    //View
-    @Override
-    public void showSearchResults(Search search, boolean newResults) {
-        if (newResults) {
-            recyclerView.scrollToPosition(0);
-        }
-        adapter.setResults(search.results());
-    }
-
-    @Override
-    public void getPosterImageUrl(String posterPath) {
-        if (adapter != null) {
-            adapter.setPosterBaseUrl(posterPath);
-        }
-    }
+    protected void onViewDetached() {}
 }

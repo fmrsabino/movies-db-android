@@ -1,5 +1,6 @@
-package fmrsabino.moviesdb.ui.main;
+package fmrsabino.moviesdb.ui.search;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
@@ -12,17 +13,16 @@ import javax.inject.Inject;
 
 import fmrsabino.moviesdb.data.DataManager;
 import fmrsabino.moviesdb.data.model.search.Search;
-import fmrsabino.moviesdb.ui.base.Presenter;
+import fmrsabino.moviesdb.ui.base.BasePresenter;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 
-public class MainPresenter implements Presenter<MainMvpView> {
-
-    private MainMvpView view;
-    private final DataManager dataManager;
+public class SearchPresenter extends BasePresenter<SearchMvpView> {
+    private SearchMvpView view;
+    @Inject DataManager dataManager;
 
     private Search searchResults;
     private String previousQuery;
@@ -30,12 +30,12 @@ public class MainPresenter implements Presenter<MainMvpView> {
     private CompositeSubscription subscriptions = new CompositeSubscription();
 
     @Inject
-    public MainPresenter(DataManager dataManager) {
-        this.dataManager = dataManager;
+    public SearchPresenter(Context context) {
+        super(context);
     }
 
     @Override
-    public void onViewAttached(MainMvpView view) {
+    public void onViewAttached(SearchMvpView view) {
         this.view = view;
     }
 
@@ -47,6 +47,11 @@ public class MainPresenter implements Presenter<MainMvpView> {
 
     @Override
     public void onDestroyed() {}
+
+    @Override
+    protected void inject() {
+        presenterComponent.inject(this);
+    }
 
     public void loadPosterImageUrl() {
         if (!dataManager.hasImage()) {

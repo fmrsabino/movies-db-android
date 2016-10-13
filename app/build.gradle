@@ -18,6 +18,7 @@ android {
         versionCode 1
         versionName "1.0"
 
+        vectorDrawables.useSupportLibrary = true
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
@@ -57,6 +58,8 @@ dependencies {
     apt     "com.jakewharton:butterknife-compiler:$BUTTER_KNIFE_VERSION"
 
     compile "com.jakewharton.rxbinding:rxbinding:$RX_BINDING_VERSION"
+
+    compile 'com.roughike:bottom-bar:2.0.2'
 
     //Retrofit
     compile "com.squareup.retrofit2:retrofit:$RETROFIT_VERSION"

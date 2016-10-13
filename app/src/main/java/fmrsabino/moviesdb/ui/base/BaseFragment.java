@@ -1,17 +1,17 @@
 package fmrsabino.moviesdb.ui.base;
 
-import android.support.v7.app.AppCompatActivity;
+import android.support.v4.app.Fragment;
 
-public abstract class BaseActivity extends AppCompatActivity {
+public abstract class BaseFragment extends Fragment {
     @Override
-    protected void onStart() {
-        super.onStart();
+    public void onResume() {
+        super.onResume();
         onViewAttached();
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
+    public void onPause() {
+        super.onPause();
         onViewDetached();
     }
 

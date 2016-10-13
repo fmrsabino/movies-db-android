@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tabs>
+    <tab
+        id="@+id/tab_search"
+        icon="@drawable/ic_search_black_24dp"
+        title="Search"/>
+    <tab
+        id="@+id/tab_favorites"
+        icon="@drawable/ic_movie_black_24dp"
+        title="Watchlist" />
+</tabs>

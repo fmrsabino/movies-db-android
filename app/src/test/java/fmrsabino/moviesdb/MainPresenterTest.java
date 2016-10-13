@@ -1,5 +1,6 @@
 package fmrsabino.moviesdb;
 
+import android.content.Context;
 import android.os.Build;
 
 import org.junit.After;
@@ -17,8 +18,8 @@ import fmrsabino.moviesdb.data.DataManager;
 import fmrsabino.moviesdb.data.model.configuration.Image;
 import fmrsabino.moviesdb.data.model.search.Result;
 import fmrsabino.moviesdb.data.model.search.Search;
-import fmrsabino.moviesdb.ui.main.MainMvpView;
-import fmrsabino.moviesdb.ui.main.MainPresenter;
+import fmrsabino.moviesdb.ui.search.SearchMvpView;
+import fmrsabino.moviesdb.ui.search.SearchPresenter;
 import rx.Observable;
 
 import static org.mockito.Matchers.any;
@@ -34,9 +35,10 @@ import static org.mockito.Mockito.when;
 public class MainPresenterTest {
 
     @Mock DataManager dataManager;
-    @Mock MainMvpView mainMvpView;
+    @Mock SearchMvpView mainMvpView;
+    @Mock Context context;
 
-    private MainPresenter mainPresenter;
+    private SearchPresenter mainPresenter;
 
     @Rule
     public final RxSchedulersOverrideRule mOverrideSchedulersRule = new RxSchedulersOverrideRule();
@@ -47,7 +49,7 @@ public class MainPresenterTest {
         Image image = Image.builder().baseUrl("mockUrl").build();
         when(dataManager.observeImage()).thenReturn(Observable.just(image));
 
-        mainPresenter = new MainPresenter(dataManager);
+        mainPresenter = new SearchPresenter(context);
         mainPresenter.onViewAttached(mainMvpView);
     }
 

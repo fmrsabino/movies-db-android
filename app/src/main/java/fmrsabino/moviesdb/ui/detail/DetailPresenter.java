@@ -1,20 +1,22 @@
 package fmrsabino.moviesdb.ui.detail;
 
+import android.content.Context;
+
 import com.annimon.stream.Stream;
 
 import javax.inject.Inject;
 
 import fmrsabino.moviesdb.data.DataManager;
 import fmrsabino.moviesdb.data.model.movie.Movie;
-import fmrsabino.moviesdb.ui.base.Presenter;
+import fmrsabino.moviesdb.ui.base.BasePresenter;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
-public class DetailPresenter implements Presenter<DetailMvpView> {
+public final class DetailPresenter extends BasePresenter<DetailMvpView> {
     private DetailMvpView view;
-    private final DataManager dataManager;
+    @Inject DataManager dataManager;
 
     private final CompositeSubscription subscriptions = new CompositeSubscription();
 
@@ -22,9 +24,8 @@ public class DetailPresenter implements Presenter<DetailMvpView> {
     private String posterUrl;
     private String coverUrl;
 
-    @Inject
-    DetailPresenter(DataManager dataManager) {
-        this.dataManager = dataManager;
+    DetailPresenter(Context context) {
+        super(context);
     }
 
     @Override
@@ -40,6 +41,11 @@ public class DetailPresenter implements Presenter<DetailMvpView> {
 
     @Override
     public void onDestroyed() {}
+
+    @Override
+    protected void inject() {
+        presenterComponent.inject(this);
+    }
 
     void loadImageUrl() {
         if (!dataManager.hasImage()) {

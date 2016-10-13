@@ -40,7 +40,7 @@ public class DetailActivity extends BaseActivity implements DetailMvpView, Loade
 
     @Override
     public Loader<DetailPresenter> onCreateLoader(int id, Bundle args) {
-        return new PresenterLoader<>(this, () -> new DetailPresenter(dataManager));
+        return new PresenterLoader<>(this, () -> new DetailPresenter(this));
     }
 
     @Override
@@ -89,11 +89,6 @@ public class DetailActivity extends BaseActivity implements DetailMvpView, Loade
     @Override
     protected void onViewDetached() {
         presenter.onViewDetached();
-    }
-
-    @Override
-    protected void inject() {
-        getActivityComponent().inject(this);
     }
 
     @Override

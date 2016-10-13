@@ -1,4 +1,4 @@
-package fmrsabino.moviesdb.ui.main;
+package fmrsabino.moviesdb.ui.search;
 
 import android.content.Context;
 import android.content.Intent;

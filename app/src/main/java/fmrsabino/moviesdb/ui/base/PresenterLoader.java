@@ -5,7 +5,7 @@ import android.support.v4.content.Loader;
 
 import rx.functions.Func0;
 
-public class PresenterLoader<T extends Presenter> extends Loader<T> {
+public class PresenterLoader<T extends BasePresenter> extends Loader<T> {
     private T presenter;
     private final Func0<T> creator;
 
