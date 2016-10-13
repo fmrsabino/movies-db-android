@@ -2,6 +2,8 @@ package fmrsabino.moviesdb.data;
 
 import android.support.annotation.NonNull;
 
+import java.util.List;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -49,8 +51,25 @@ public class DataManager {
 
     public Observable<Movie> syncMovie(final int id) {
         return movieService.getMovie(id)
-                .concatMap(databaseHelper::setMovie)
+                .concatMap(databaseHelper::storeMovie)
                 .doOnNext(movie -> Timber.i("Synced movie (%s)", movie.title()));
+    }
+
+    public Observable<Movie> storeMovie(final Movie movie) {
+        return databaseHelper.storeMovie(movie);
+    }
+
+    public boolean hasMovie(final String movieId) {
+        return databaseHelper.hasMovie(movieId);
+    }
+
+    public Observable<List<Movie>> observeMovie(final String movieId) {
+        return databaseHelper.observeMovie(movieId);
+    }
+
+    public Observable<String> deleteMovie(final String movieId) {
+        return databaseHelper.deleteMovie(movieId)
+                .doOnNext(id -> Timber.d("Deleted movie with id %s", id));
     }
 
     public Observable<Movie> getRemoteMovie(final int id) {

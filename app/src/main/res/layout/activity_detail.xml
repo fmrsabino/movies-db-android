@@ -14,4 +14,8 @@
         android:layout_height="wrap_content"
         android:textSize="30sp"/>
 
+    <Button
+        android:id="@+id/activity_detail_add_watchlist"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
 </LinearLayout>

@@ -5,21 +5,25 @@ import com.annimon.stream.Stream;
 import javax.inject.Inject;
 
 import fmrsabino.moviesdb.data.DataManager;
+import fmrsabino.moviesdb.data.model.movie.Movie;
 import fmrsabino.moviesdb.ui.base.Presenter;
-import fmrsabino.moviesdb.util.RxUtil;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import rx.subscriptions.CompositeSubscription;
 
 public class DetailPresenter implements Presenter<DetailMvpView> {
-
     private DetailMvpView view;
     private final DataManager dataManager;
 
-    private Subscription imageSubscription;
+    private final CompositeSubscription subscriptions = new CompositeSubscription();
+
+    private Movie activeMovie;
+    private String posterUrl;
+    private String coverUrl;
 
     @Inject
-    public DetailPresenter(DataManager dataManager) {
+    DetailPresenter(DataManager dataManager) {
         this.dataManager = dataManager;
     }
 
@@ -31,15 +35,27 @@ public class DetailPresenter implements Presenter<DetailMvpView> {
     @Override
     public void onViewDetached() {
         view = null;
-        RxUtil.unsubscribe(imageSubscription);
+        subscriptions.clear();
     }
 
     @Override
     public void onDestroyed() {}
 
-    public void loadImageUrl() {
-        RxUtil.unsubscribe(imageSubscription);
-        imageSubscription = dataManager.observeImage()
+    void loadImageUrl() {
+        if (!dataManager.hasImage()) {
+            subscriptions.add(syncRemoteImage());
+        }
+        subscriptions.add(observeDbImage());
+    }
+
+    private Subscription syncRemoteImage() {
+        return dataManager.syncImage()
+                .subscribeOn(Schedulers.io())
+                .subscribe(image -> {}, Throwable::printStackTrace);
+    }
+
+    private Subscription observeDbImage() {
+        return dataManager.observeImage()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe(
@@ -49,30 +65,85 @@ public class DetailPresenter implements Presenter<DetailMvpView> {
                                         .filter(s -> s.equals("w185"))
                                         .findFirst()
                                         .get();
-                                view.getPosterUrl(image.baseUrl() + posterSize);
+                                posterUrl = image.baseUrl() + posterSize;
+                                view.getPosterUrl(posterUrl);
                                 String coverSize = Stream.of(image.backdropSizes())
                                         .filter(s -> s.equals("w1280"))
                                         .findFirst()
                                         .get();
-                                view.getCoverUrl(image.baseUrl() + coverSize);
+                                coverUrl = image.baseUrl() + coverSize;
+                                view.getCoverUrl(coverUrl);
                             }
                         },
                         Throwable::printStackTrace,
                         () -> {});
     }
 
-    public void getMovie(final int id) {
-        dataManager.getRemoteMovie(id)
-                .observeOn(AndroidSchedulers.mainThread())
+    void getMovie(final int id) {
+        String movieId = Integer.toString(id);
+        if (activeMovie != null) {
+            view.getMovieDetails(activeMovie);
+        } else if (!dataManager.hasMovie(movieId)) {
+            subscriptions.add(getRemoteMovie(id));
+        }
+        subscriptions.add(observeDbMovie(movieId));
+    }
+
+    private Subscription getRemoteMovie(final int id) {
+        return dataManager.getRemoteMovie(id)
                 .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         movie -> {
-                            if (view != null) {
-                                view.getMovieDetails(movie);
-                            }
+                            activeMovie = movie;
+                            if (view != null) view.getMovieDetails(activeMovie);
                         },
                         Throwable::printStackTrace,
                         () -> {}
                 );
+    }
+
+    private Subscription observeDbMovie(final String movieId) {
+        return dataManager.observeMovie(movieId)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        movies -> {
+                            if (view == null) return;
+                            if (!movies.isEmpty()) {
+                                if (activeMovie == null) {
+                                    activeMovie = movies.get(0);
+                                }
+                                view.savedMovie(activeMovie);
+                            } else {
+                                view.savedMovie(null);
+                            }
+                        },
+                        Throwable::printStackTrace);
+    }
+
+    void saveMovie(final Movie movie) {
+        dataManager.storeMovie(movie)
+                .subscribe(
+                        m -> {},
+                        Throwable::printStackTrace);
+    }
+
+    void deleteMovie(final String movieId) {
+        dataManager.deleteMovie(movieId)
+                .subscribe(
+                        s -> {},
+                        Throwable::printStackTrace);
+    }
+
+    Movie getActiveMovie() {
+        return activeMovie;
+    }
+
+    String getPosterUrl() {
+        return posterUrl;
+    }
+
+    String getCoverUrl() {
+        return coverUrl;
     }
 }

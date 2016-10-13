@@ -4,9 +4,11 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.jakewharton.rxbinding.view.RxView;
 import com.squareup.picasso.Picasso;
 
 import javax.inject.Inject;
@@ -18,19 +20,23 @@ import fmrsabino.moviesdb.data.DataManager;
 import fmrsabino.moviesdb.data.model.movie.Movie;
 import fmrsabino.moviesdb.ui.base.BaseActivity;
 import fmrsabino.moviesdb.ui.base.PresenterLoader;
+import fmrsabino.moviesdb.util.RxUtil;
+import rx.Subscription;
 
 public class DetailActivity extends BaseActivity implements DetailMvpView, LoaderManager.LoaderCallbacks<DetailPresenter> {
+    public static final String MOVIE_ID_EXTRA = "movieId";
 
     @Inject DataManager dataManager;
     @Inject DetailPresenter presenter;
 
     @BindView(R.id.activity_detail_movie_title) TextView movieTitle;
     @BindView(R.id.activity_detail_movie_cover) ImageView coverImage;
+    @BindView(R.id.activity_detail_add_watchlist) Button watchlistButton;
 
     private int id;
-    private Movie movie;
-    private String coverUrl;
-    private String posterUrl;
+    private boolean stored;
+
+    private Subscription watchlistButtonClick;
 
     @Override
     public Loader<DetailPresenter> onCreateLoader(int id, Bundle args) {
@@ -51,7 +57,26 @@ public class DetailActivity extends BaseActivity implements DetailMvpView, Loade
         setContentView(R.layout.activity_detail);
         ButterKnife.bind(this);
         getSupportLoaderManager().initLoader(0, null, this);
-        id = getIntent().getIntExtra("movieId", -1);
+        id = getIntent().getIntExtra(MOVIE_ID_EXTRA, -1);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        watchlistButtonClick = RxView.clicks(watchlistButton)
+                .subscribe(aVoid -> {
+                    Movie movie = presenter.getActiveMovie();
+                    if (stored) {
+                        presenter.deleteMovie(Integer.toString(movie.id()));
+                    } else {
+                        presenter.saveMovie(movie);
+                    }}, Throwable::printStackTrace);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        RxUtil.unsubscribe(watchlistButtonClick);
     }
 
     @Override
@@ -73,29 +98,33 @@ public class DetailActivity extends BaseActivity implements DetailMvpView, Loade
 
     @Override
     public void getMovieDetails(Movie movie) {
-        this.movie = movie;
         movieTitle.setText(movie.title());
         reloadImages();
     }
 
     @Override
     public void getCoverUrl(String url) {
-        coverUrl = url;
         reloadImages();
     }
 
     @Override
     public void getPosterUrl(String url) {
-        posterUrl = url;
         reloadImages();
     }
 
     private void reloadImages() {
+        Movie movie = presenter.getActiveMovie();
         if (movie != null) {
-            Picasso.with(this).load(coverUrl + movie.backdropPath())
+            Picasso.with(this).load(presenter.getPosterUrl() + movie.backdropPath())
                     .fit()
                     .centerCrop()
                     .into(coverImage);
         }
+    }
+
+    @Override
+    public void savedMovie(Movie storedMovie) {
+        stored = storedMovie != null;
+        watchlistButton.setText(getString(stored ? R.string.watchlist_remove : R.string.watchlist_add));
     }
 }

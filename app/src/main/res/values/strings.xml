@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">MoviesDB</string>
+    <string name="watchlist_add">Add to Watchlist</string>
+    <string name="watchlist_remove">Remove from Watchlist</string>
 </resources>
