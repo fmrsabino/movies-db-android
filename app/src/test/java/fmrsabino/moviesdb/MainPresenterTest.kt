@@ -1,15 +1,14 @@
 package fmrsabino.moviesdb
 
 import android.content.Context
-import fmrsabino.RxSchedulersOverrideRule
 import fmrsabino.moviesdb.data.DataManager
 import fmrsabino.moviesdb.data.model.configuration.Image
 import fmrsabino.moviesdb.data.model.search.Search
 import fmrsabino.moviesdb.ui.search.SearchMvpView
 import fmrsabino.moviesdb.ui.search.SearchPresenter
+import io.reactivex.Observable
 import org.junit.After
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
@@ -17,7 +16,6 @@ import org.mockito.Mockito.*
 import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import rx.Observable
 
 @RunWith(RobolectricTestRunner::class)
 @Config(constants = BuildConfig::class)
@@ -27,9 +25,6 @@ class MainPresenterTest {
     @Mock lateinit var context: Context
 
     lateinit var mainPresenter: SearchPresenter
-
-    @Rule
-    val mOverrideSchedulersRule = RxSchedulersOverrideRule()
 
     @Before
     fun setUp() {
@@ -49,7 +44,7 @@ class MainPresenterTest {
     @Test
     fun getSearchReturnsCachedResponse() {
         val query = "mockQuery"
-        mainPresenter.setPreviousQuery(query)
+        mainPresenter.previousQuery = query
 
         mainPresenter.getSearch(query)
         verify(mainMvpView).showSearchResults(any(Search::class.java), eq(false))

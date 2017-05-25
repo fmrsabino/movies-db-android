@@ -8,7 +8,7 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.view.LayoutInflater
 import android.widget.LinearLayout
-import com.jakewharton.rxbinding.view.clicks
+import com.jakewharton.rxbinding2.view.clicks
 import fmrsabino.moviesdb.R
 import fmrsabino.moviesdb.data.model.search.Search
 import fmrsabino.moviesdb.ui.base.PresenterLoader

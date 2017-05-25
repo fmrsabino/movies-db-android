@@ -1,10 +1,10 @@
 package fmrsabino.moviesdb
 
-import fmrsabino.RxSchedulersOverrideRule
 import fmrsabino.moviesdb.data.local.DatabaseHelper
 import fmrsabino.moviesdb.data.local.DbOpenHelper
 import fmrsabino.moviesdb.data.local.table.ImageTable
 import fmrsabino.moviesdb.data.model.configuration.Image
+import io.reactivex.observers.TestObserver
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertNotNull
 import org.junit.Before
@@ -15,14 +15,14 @@ import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
-import rx.observers.TestSubscriber
+
 
 @RunWith(RobolectricTestRunner::class)
 @Config(constants = BuildConfig::class)
 class DatabaseHelperTest {
     lateinit var databaseHelper: DatabaseHelper
 
-    @JvmField @Rule val mOverrideSchedulersRule = RxSchedulersOverrideRule()
+    @JvmField @Rule val trampolineSchedulerRule = TrampolineSchedulerRule()
 
     @Before
     fun setUp() {
@@ -35,20 +35,19 @@ class DatabaseHelperTest {
         val image = Image(baseUrl = "mockUrl")
 
         //Verify Image emission
-        val testSubscriber = TestSubscriber<Image>()
-        databaseHelper.setImage(image)?.subscribe(testSubscriber)
-        testSubscriber.assertNoErrors()
-        testSubscriber.assertValue(image)
+        val testObserver = TestObserver<Image>()
+        databaseHelper.setImage(image).subscribe(testObserver)
+        testObserver.assertNoErrors()
+        testObserver.assertValue(image)
 
         //Verify object storage
         val c = databaseHelper.db.query("SELECT * FROM " + ImageTable.TABLE_NAME)
         assertNotNull(c)
         c?.let {
             assertEquals(it.count, 1)
-            while (it.moveToNext()) {
-                val img = ImageTable.parseCursor(it)
-                assertEquals(image, img)
-            }
+            it.moveToNext()
+            val img = ImageTable.parseCursor(it)
+            assertEquals(image, img)
         }
     }
 
@@ -56,34 +55,33 @@ class DatabaseHelperTest {
     fun setImageReplacesOldImage() {
         val oldImage = Image(baseUrl = "oldImage")
         val newImage = Image(baseUrl = "newImage")
-        databaseHelper.setImage(oldImage)?.subscribe(TestSubscriber<Any>())
-        databaseHelper.setImage(newImage)?.subscribe(TestSubscriber<Any>())
+        databaseHelper.setImage(oldImage).subscribe()
+        databaseHelper.setImage(newImage).subscribe()
         val c = databaseHelper.db.query("SELECT * FROM " + ImageTable.TABLE_NAME)
         assertNotNull(c)
         c?.let {
             assertEquals(it.count, 1)
-            while (it.moveToNext()) {
-                val img = ImageTable.parseCursor(it)
-                assertEquals(newImage, img)
-            }
+            val img = ImageTable.parseCursor(it)
+            assertEquals(newImage, img)
         }
     }
 
     @Test
     fun observeImageDoesNotEnd() {
-        val testSubscriber = TestSubscriber<Image>()
-        databaseHelper.observeImage().subscribe(testSubscriber)
-        testSubscriber.assertNoErrors()
-        testSubscriber.assertNotCompleted()
+        val testObserver = TestObserver<Image>()
+        databaseHelper.observeImage().subscribe(testObserver)
+        testObserver.assertNoErrors()
+        testObserver.assertNotTerminated()
     }
 
     @Test
     fun observeImageEmitsValues() {
-        val image = Image(baseUrl = "mock")
-        databaseHelper.setImage(image)?.subscribe(TestSubscriber<Any>())
-        val testSubscriber = TestSubscriber<Image>()
-        databaseHelper.observeImage().subscribe(testSubscriber)
-        testSubscriber.assertNoErrors()
-        testSubscriber.assertValue(image)
+        val image = Image()
+        databaseHelper.setImage(image).subscribe(TestObserver())
+        val testObserver = TestObserver<Image>()
+        databaseHelper.observeImage().subscribe(testObserver)
+        testObserver.assertNoErrors()
+        testObserver.assertValue(image)
+        testObserver.assertNotTerminated()
     }
 }

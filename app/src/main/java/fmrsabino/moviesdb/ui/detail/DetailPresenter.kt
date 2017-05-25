@@ -2,22 +2,22 @@ package fmrsabino.moviesdb.ui.detail
 
 import android.content.Context
 import fmrsabino.moviesdb.data.DataManager
-import fmrsabino.moviesdb.data.model.configuration.Image
 import fmrsabino.moviesdb.data.model.movie.Movie
 import fmrsabino.moviesdb.ui.base.BasePresenter
-import rx.Subscription
-import rx.android.schedulers.AndroidSchedulers
-import rx.lang.kotlin.FunctionSubscriber
-import rx.lang.kotlin.plusAssign
-import rx.schedulers.Schedulers
-import rx.subscriptions.CompositeSubscription
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
+import io.reactivex.rxkotlin.plusAssign
+import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.schedulers.Schedulers
+import timber.log.Timber
 import javax.inject.Inject
 
 class DetailPresenter internal constructor(context: Context) : BasePresenter<DetailMvpView>(context) {
     private var view: DetailMvpView? = null
     @Inject lateinit var dataManager: DataManager
 
-    private val subscriptions = CompositeSubscription()
+    private val disposables = CompositeDisposable()
 
     init {
         inject()
@@ -36,7 +36,7 @@ class DetailPresenter internal constructor(context: Context) : BasePresenter<Det
 
     public override fun onViewDetached() {
         view = null
-        subscriptions.clear()
+        disposables.clear()
     }
 
     public override fun onDestroyed() {}
@@ -47,31 +47,31 @@ class DetailPresenter internal constructor(context: Context) : BasePresenter<Det
 
     fun loadImageUrl() {
         if (!dataManager.hasImage()) {
-            subscriptions += syncRemoteImage()
+            disposables += syncRemoteImage()
         }
-        subscriptions += observeDbImage()
+        disposables += observeDbImage()
     }
 
-    private fun syncRemoteImage(): Subscription {
+    private fun syncRemoteImage(): Disposable {
         return dataManager.syncImage()
                 .subscribeOn(Schedulers.io())
-                .subscribe(FunctionSubscriber<Image>()
-                        .onError{ it.printStackTrace() })
+                .subscribeBy(onError = { Timber.e(it) })
     }
 
-    private fun observeDbImage(): Subscription {
+    private fun observeDbImage(): Disposable {
         return dataManager.observeImage()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
-                .subscribe(FunctionSubscriber<Image>()
-                        .onNext {
+                .subscribeBy(
+                        onNext = {
                             val posterSize = it.logoSizes?.filter { it == "w185" }?.firstOrNull()
                             posterUrl = it.baseUrl + posterSize
                             posterUrl?.let { view?.getPosterUrl(it) }
                             val coverSize = it.backdropSizes?.filter { it == "w1280" }?.firstOrNull()
                             coverUrl = it.baseUrl + coverSize
-                            coverUrl?.let { view?.getCoverUrl(it) } }
-                        .onError{ it.printStackTrace() })
+                            coverUrl?.let { view?.getCoverUrl(it) }
+                        },
+                        onError = { Timber.e(it) })
     }
 
     internal fun getMovie(id: String) {
@@ -79,36 +79,31 @@ class DetailPresenter internal constructor(context: Context) : BasePresenter<Det
         if (activeMovie != null) {
             view?.getMovieDetails(activeMovie)
         } else if (!dataManager.hasMovie(id)) {
-            subscriptions += getRemoteMovie(id)
+            disposables += getRemoteMovie(id)
         }
-        subscriptions += observeDbMovie(id)
+        disposables += observeDbMovie(id)
     }
 
-    private fun getRemoteMovie(id: String): Subscription {
-        return dataManager.getRemoteMovie(id)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(FunctionSubscriber<Movie>()
-                        .onNext {
-                            activeMovie = it
-                            view?.getMovieDetails(it) })
-    }
+    private fun getRemoteMovie(id: String) = dataManager.getRemoteMovie(id)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeBy(
+                    onNext = {
+                        activeMovie = it
+                        view?.getMovieDetails(it)
+                    },
+                    onError = { Timber.e(it) })
 
-    private fun observeDbMovie(movieId: String): Subscription {
-        return dataManager.observeMovie(movieId)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(FunctionSubscriber<List<Movie>>()
-                        .onNext { movies -> movies.firstOrNull()?.let { view?.savedMovie(it) } })
-    }
+    private fun observeDbMovie(movieId: String) = dataManager.observeMovie(movieId)
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeBy(
+                    onNext = { movies -> movies.firstOrNull()?.let { view?.savedMovie(it) } },
+                    onError = { Timber.e(it) })
 
-    fun saveMovie(movie: Movie) {
-        dataManager.storeMovie(movie)?.subscribe(FunctionSubscriber<Movie>()
-                .onError { it.printStackTrace() })
-    }
+    fun saveMovie(movie: Movie) = dataManager.storeMovie(movie)
+            .subscribeBy(onError = { Timber.e(it) })
 
-    internal fun deleteMovie(movieId: String) {
-        dataManager.deleteMovie(movieId).subscribe(FunctionSubscriber<String>()
-                        .onError { it.printStackTrace() })
-    }
+    internal fun deleteMovie(movieId: String) = dataManager.deleteMovie(movieId)
+            .subscribeBy(onError = { Timber.e(it) })
 }
 

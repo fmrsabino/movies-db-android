@@ -3,7 +3,7 @@ package fmrsabino.moviesdb.ui.detail
 import android.os.Bundle
 import android.support.v4.app.LoaderManager
 import android.support.v4.content.Loader
-import com.jakewharton.rxbinding.view.clicks
+import com.jakewharton.rxbinding2.view.clicks
 import com.squareup.picasso.Picasso
 import fmrsabino.moviesdb.R
 import fmrsabino.moviesdb.data.DataManager

@@ -6,15 +6,15 @@ import fmrsabino.moviesdb.data.model.movie.Movie
 import fmrsabino.moviesdb.data.model.search.Search
 import fmrsabino.moviesdb.util.Constants
 import fmrsabino.moviesdb.util.DateTypeAdapter
+import io.reactivex.Observable
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
-import rx.Observable
 
 interface MovieAPI {
     @GET("configuration")
@@ -41,7 +41,7 @@ interface MovieAPI {
                     .baseUrl(Constants.BASE_URL)
                     .client(client)
                     .addConverterFactory(MoshiConverterFactory.create(moshi))
-                    .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                    .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                     .build()
 
             return retrofit.create(MovieAPI::class.java)
@@ -55,7 +55,8 @@ interface MovieAPI {
                     val builder = request.url().newBuilder()
                     val url = builder.addQueryParameter("api_key", Constants.API_KEY).build()
                     request = request.newBuilder().url(url).build()
-                    it.proceed(request) }
+                    it.proceed(request)
+                }
             }
     }
 }

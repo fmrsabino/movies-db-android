@@ -6,7 +6,7 @@ import fmrsabino.moviesdb.data.model.configuration.Image
 import fmrsabino.moviesdb.data.model.movie.Movie
 import fmrsabino.moviesdb.data.model.search.Search
 import fmrsabino.moviesdb.data.remote.MovieAPI
-import rx.Observable
+import io.reactivex.Observable
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -27,38 +27,22 @@ import javax.inject.Singleton
                 .doOnNext { Timber.i("Synced image - %s", it.toString()) }
     }
 
-    fun observeImage(): Observable<Image> {
-        return databaseHelper.observeImage()
-    }
+    fun observeImage() = databaseHelper.observeImage()
 
-    fun hasImage(): Boolean {
-        return databaseHelper.hasImage()
-    }
+    fun hasImage() = databaseHelper.hasImage()
 
-    fun syncMovie(id: String): Observable<Movie> {
-        return movieService.getMovie(id)
-                .concatMap { databaseHelper.storeMovie(it) }
-                .doOnNext { Timber.i("Synced movie (%s)", it.title) }
-    }
+    fun syncMovie(id: String) = movieService.getMovie(id)
+            .concatMap { databaseHelper.storeMovie(it) }
+            .doOnNext { Timber.i("Synced movie (%s)", it.title) }
 
-    fun storeMovie(movie: Movie): Observable<Movie>? {
-        return databaseHelper.storeMovie(movie)
-    }
+    fun storeMovie(movie: Movie) = databaseHelper.storeMovie(movie)
 
-    fun hasMovie(movieId: String): Boolean {
-        return databaseHelper.hasMovie(movieId)
-    }
+    fun hasMovie(movieId: String) = databaseHelper.hasMovie(movieId)
 
-    fun observeMovie(movieId: String): Observable<List<Movie>> {
-        return databaseHelper.observeMovie(movieId)
-    }
+    fun observeMovie(movieId: String) = databaseHelper.observeMovie(movieId)
 
-    fun deleteMovie(movieId: String): Observable<String> {
-        return databaseHelper.deleteMovie(movieId)
-                .doOnNext { id -> Timber.d("Deleted movie with id %s", id) }
-    }
+    fun deleteMovie(movieId: String) = databaseHelper.deleteMovie(movieId)
+            .doOnNext { id -> Timber.d("Deleted movie with id %s", id) }
 
-    fun getRemoteMovie(id: String): Observable<Movie> {
-        return movieService.getMovie(id)
-    }
+    fun getRemoteMovie(id: String) = movieService.getMovie(id)
 }

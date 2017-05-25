@@ -5,7 +5,10 @@ import android.database.Cursor
 import fmrsabino.moviesdb.data.model.movie.Movie
 import fmrsabino.moviesdb.util.getLong
 import fmrsabino.moviesdb.util.getString
-import org.joda.time.DateTime
+import fmrsabino.moviesdb.util.toDefaultEpochMilli
+import fmrsabino.moviesdb.util.toDefaultLocalDateTime
+import org.threeten.bp.Instant
+import org.threeten.bp.ZoneId
 
 object MovieTable {
     val TABLE_NAME = "movie"
@@ -36,7 +39,7 @@ object MovieTable {
         values.put(COLUMN_ID, movie.id)
         movie.backdropPath?.let { values.put(COLUMN_BACKDROP_PATH, movie.backdropPath) }
         movie.posterPath?.let { values.put(COLUMN_POSTER_PATH, movie.posterPath) }
-        movie.releaseDate?.let { values.put(COLUMN_RELEASE_DATE, movie.releaseDate.toDate().time) }
+        movie.releaseDate?.let { values.put(COLUMN_RELEASE_DATE, movie.releaseDate.toDefaultEpochMilli()) }
         movie.imdbId?.let { values.put(COLUMN_IMDB_ID, movie.imdbId) }
         movie.title?.let { values.put(COLUMN_TITLE, movie.title) }
         movie.tagline?.let { values.put(COLUMN_TAGLINE, movie.tagline) }
@@ -49,7 +52,7 @@ object MovieTable {
                 id = c.getString(COLUMN_ID)!!,
                 backdropPath = c.getString(COLUMN_BACKDROP_PATH),
                 posterPath = c.getString(COLUMN_POSTER_PATH),
-                releaseDate = DateTime(c.getLong(COLUMN_RELEASE_DATE)),
+                releaseDate = c.getLong(COLUMN_RELEASE_DATE).toDefaultLocalDateTime(),
                 imdbId = c.getString(COLUMN_IMDB_ID),
                 title = c.getString(COLUMN_TITLE),
                 tagline = c.getString(COLUMN_TAGLINE),

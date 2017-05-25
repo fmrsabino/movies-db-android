@@ -4,10 +4,11 @@ import android.content.Context
 import fmrsabino.moviesdb.data.DataManager
 import fmrsabino.moviesdb.data.model.search.Search
 import fmrsabino.moviesdb.ui.base.BasePresenter
-import rx.Subscription
-import rx.android.schedulers.AndroidSchedulers
-import rx.schedulers.Schedulers
-import rx.subscriptions.CompositeSubscription
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
+import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -16,9 +17,9 @@ class SearchPresenter(context: Context) : BasePresenter<SearchMvpView>(context) 
     @Inject lateinit var dataManager: DataManager
 
     private var searchResults: Search? = null
-    private var previousQuery: String? = null
+    var previousQuery: String? = null
 
-    private val subscriptions: CompositeSubscription = CompositeSubscription()
+    private val disposables = CompositeDisposable()
 
     init {
         inject()
@@ -30,7 +31,7 @@ class SearchPresenter(context: Context) : BasePresenter<SearchMvpView>(context) 
 
     public override fun onViewDetached() {
         this.view = null
-        subscriptions.clear()
+        disposables.clear()
     }
 
     override fun onDestroyed() {}
@@ -44,19 +45,22 @@ class SearchPresenter(context: Context) : BasePresenter<SearchMvpView>(context) 
             dataManager.syncImage()
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeOn(Schedulers.io())
-                    .subscribe({}, Throwable::printStackTrace)
+                    .subscribeBy(onError = { Timber.e(it) })
         }
-        subscriptions.add(observeDbImage())
+        disposables.add(observeDbImage())
     }
 
-    private fun observeDbImage(): Subscription {
+    private fun observeDbImage(): Disposable {
         return dataManager.observeImage()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
-                .subscribe({ image ->
-                    val s = image.logoSizes?.filter { s -> s == "w185" }?.firstOrNull()
-                    view?.getPosterImageUrl(image.baseUrl + s) },
-                        { throwable -> Timber.e("Error loading image url") })
+                .subscribeBy(
+                        onNext = {
+                            val s = it.logoSizes?.filter { s -> s == "w185" }?.firstOrNull()
+                            view?.getPosterImageUrl(it.baseUrl + s)
+                        },
+                        onError = { Timber.e("Error loading image url") }
+                )
     }
 
     fun getSearch(query: String) {
@@ -65,29 +69,23 @@ class SearchPresenter(context: Context) : BasePresenter<SearchMvpView>(context) 
             searchResults?.let { view?.showSearchResults(it, false) }
         } else {
             Timber.i("No search done. Fetching from web")
-            subscriptions.add(performSearch(query))
+            disposables.add(performSearch(query))
         }
     }
 
-    private fun performSearch(query: String): Subscription {
-        return dataManager.getRemoteSearch(query)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        { search ->
-                            searchResults = search
-                            previousQuery = query
-                            view?.showSearchResults(search, true)
-                        },
-                        { throwable ->
-                            Timber.e("Error performing search")
-                            this.previousQuery = ""
-                            val emptySearch = Search()
-                            view?.showSearchResults(emptySearch, true)
-                        })
-    }
-
-    fun setPreviousQuery(previousQuery: String) {
-        this.previousQuery = previousQuery
-    }
+    private fun performSearch(query: String) = dataManager.getRemoteSearch(query)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeBy(
+                    onNext = {
+                        searchResults = it
+                        previousQuery = query
+                        view?.showSearchResults(it, true)
+                    },
+                    onError = {
+                        Timber.e("Error performing search")
+                        this.previousQuery = ""
+                        val emptySearch = Search()
+                        view?.showSearchResults(emptySearch, true)
+                    })
 }

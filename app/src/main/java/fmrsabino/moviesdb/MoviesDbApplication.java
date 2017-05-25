@@ -3,7 +3,7 @@ package fmrsabino.moviesdb;
 import android.app.Application;
 import android.content.Context;
 
-import net.danlew.android.joda.JodaTimeAndroid;
+import com.jakewharton.threetenabp.AndroidThreeTen;
 
 import fmrsabino.moviesdb.injection.component.ApplicationComponent;
 import fmrsabino.moviesdb.injection.component.DaggerApplicationComponent;
@@ -16,7 +16,7 @@ public class MoviesDbApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        JodaTimeAndroid.init(this);
+        AndroidThreeTen.init(this);
         if (BuildConfig.DEBUG) {
             Timber.plant(new Timber.DebugTree());
         }

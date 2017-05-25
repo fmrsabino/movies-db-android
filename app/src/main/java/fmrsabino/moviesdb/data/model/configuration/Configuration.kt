@@ -2,7 +2,7 @@ package fmrsabino.moviesdb.data.model.configuration
 
 import com.squareup.moshi.Json
 
-data class Configuration(val images: Image? = null)
+data class Configuration(val images: Image)
 
 data class Image(
         @Json(name = "base_url") val baseUrl: String? = null,

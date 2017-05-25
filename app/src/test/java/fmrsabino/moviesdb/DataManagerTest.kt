@@ -5,20 +5,30 @@ import fmrsabino.moviesdb.data.local.DatabaseHelper
 import fmrsabino.moviesdb.data.model.configuration.Configuration
 import fmrsabino.moviesdb.data.model.configuration.Image
 import fmrsabino.moviesdb.data.remote.MovieAPI
+import io.reactivex.Observable
+import io.reactivex.android.plugins.RxAndroidPlugins
+import io.reactivex.observers.TestObserver
+import io.reactivex.schedulers.Schedulers
 import org.junit.Before
+import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.*
 import org.mockito.junit.MockitoJUnitRunner
-import rx.Observable
-import rx.observers.TestSubscriber
 
 @RunWith(MockitoJUnitRunner::class)
 class DataManagerTest {
     @Mock lateinit var movieAPI: MovieAPI
     @Mock lateinit var databaseHelper: DatabaseHelper
     @Mock lateinit var dataManager: DataManager
+
+    companion object {
+        @BeforeClass
+        fun setupClass() {
+            RxAndroidPlugins.setInitMainThreadSchedulerHandler { Schedulers.trampoline() }
+        }
+    }
 
     @Before
     fun setUp() {
@@ -30,44 +40,29 @@ class DataManagerTest {
         val image = Image(baseUrl = "mock")
         val configuration = Configuration(images = image)
 
-        `when`(movieAPI.getConfiguration()).thenReturn(Observable.just<Configuration>(configuration))
+        `when`(movieAPI.getConfiguration()).thenReturn(Observable.just(configuration))
         `when`(databaseHelper.setImage(configuration.images)).thenReturn(Observable.just(configuration.images))
 
-        val testSubscriber = TestSubscriber<Image>()
-        dataManager.syncImage().subscribe(testSubscriber)
-        testSubscriber.assertNoErrors()
-        testSubscriber.assertValue(image)
+        val testObserver = TestObserver<Image>()
+        dataManager.syncImage().subscribe(testObserver)
+        testObserver.assertNoErrors()
+        testObserver.assertValue(image)
     }
 
     @Test
     fun syncImageDoesNotCallDatabaseOnApiFail() {
         `when`(movieAPI.getConfiguration()).thenReturn(Observable.error(RuntimeException()))
-        dataManager.syncImage().subscribe(TestSubscriber<Any>())
+        dataManager.syncImage().subscribe(TestObserver())
         verify(movieAPI).getConfiguration()
-        verify(databaseHelper, never()).setImage(any(Image::class.java))
+        verify(databaseHelper, never()).setImage(Image())
     }
 
     @Test
-    fun observeImageNotStoredTest() {
-        val image = Image(baseUrl = "mock")
-        val configuration = Configuration(images = image)
+    fun observeImageTest() {
+        `when`(databaseHelper.observeImage()).thenReturn(Observable.just(Image()))
 
-        `when`(movieAPI.getConfiguration()).thenReturn(Observable.just<Configuration>(configuration))
-        `when`(databaseHelper.setImage(configuration.images)).thenReturn(Observable.just(configuration.images))
-        `when`(databaseHelper.hasImage()).thenReturn(false)
-        `when`(databaseHelper.observeImage()).thenReturn(Observable.just<Image>(image))
+        dataManager.observeImage().subscribe(TestObserver())
 
-        val testSubscriber = TestSubscriber<Image>()
-        dataManager.observeImage().subscribe(testSubscriber)
-        testSubscriber.assertValue(image)
-    }
-
-    @Test
-    fun observeImageNoApiCallIfImagePresent() {
-        val image = Image(baseUrl = "mock")
-        `when`(databaseHelper.hasImage()).thenReturn(true)
-        `when`(databaseHelper.observeImage()).thenReturn(Observable.just<Image>(image))
-        verify(movieAPI, never()).getConfiguration()
-        dataManager.observeImage().subscribe()
+        verify(databaseHelper).observeImage()
     }
 }
