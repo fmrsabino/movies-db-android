@@ -45,4 +45,6 @@ import javax.inject.Singleton
             .doOnNext { id -> Timber.d("Deleted movie with id %s", id) }
 
     fun getRemoteMovie(id: String) = movieService.getMovie(id)
+
+    fun discoverMovies() = movieService.discoverMovies().map { it.results }
 }

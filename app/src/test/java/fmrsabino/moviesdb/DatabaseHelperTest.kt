@@ -5,8 +5,9 @@ import fmrsabino.moviesdb.data.local.DbOpenHelper
 import fmrsabino.moviesdb.data.local.table.ImageTable
 import fmrsabino.moviesdb.data.model.configuration.Image
 import io.reactivex.observers.TestObserver
-import junit.framework.Assert.assertEquals
-import junit.framework.Assert.assertNotNull
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
+
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test

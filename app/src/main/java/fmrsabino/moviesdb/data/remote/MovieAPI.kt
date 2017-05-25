@@ -7,6 +7,7 @@ import fmrsabino.moviesdb.data.model.search.Search
 import fmrsabino.moviesdb.util.Constants
 import fmrsabino.moviesdb.util.DateTypeAdapter
 import io.reactivex.Observable
+import io.reactivex.schedulers.Schedulers
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -26,8 +27,13 @@ interface MovieAPI {
     @GET("movie/{id}")
     fun getMovie(@Path("id") id: String): Observable<Movie>
 
+    @GET("discover/movie")
+    fun discoverMovies(@Query("sort_by") sortBy: String = SORT_BY_POPULARITY_DESC,
+                       @Query("language") language: String = "en-US"): Observable<Network.PaginatedResponse<Network.Movie>>
 
     companion object {
+        val SORT_BY_POPULARITY_DESC = "popularity.desc"
+
         fun createMovieService(): MovieAPI {
             val client = OkHttpClient.Builder()
                     .addInterceptor(interceptor)
@@ -41,7 +47,7 @@ interface MovieAPI {
                     .baseUrl(Constants.BASE_URL)
                     .client(client)
                     .addConverterFactory(MoshiConverterFactory.create(moshi))
-                    .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                    .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(Schedulers.io()))
                     .build()
 
             return retrofit.create(MovieAPI::class.java)

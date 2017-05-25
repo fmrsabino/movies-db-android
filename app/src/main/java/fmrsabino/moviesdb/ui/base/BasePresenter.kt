@@ -13,11 +13,7 @@ abstract class BasePresenter<in V : MvpView> protected constructor(context: Cont
     internal abstract fun onDestroyed()
     protected abstract fun inject()
 
-    protected val presenterComponent: PresenterComponent
-
-    init {
-        presenterComponent = DaggerPresenterComponent.builder()
-                .applicationComponent(MoviesDbApplication.get(context).component)
-                .build()
-    }
+    protected val presenterComponent: PresenterComponent = DaggerPresenterComponent.builder()
+            .applicationComponent(MoviesDbApplication.get(context).component)
+            .build()
 }

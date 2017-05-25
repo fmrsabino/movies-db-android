@@ -27,6 +27,11 @@ android {
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
     }
+
+    packagingOptions {
+        //https://github.com/ReactiveX/RxJava/issues/4445
+        exclude 'META-INF/rxjava.properties'
+    }
 }
 
 kapt {
@@ -57,6 +62,7 @@ dependencies {
 
     compile "com.jakewharton.rxbinding2:rxbinding-kotlin:$RX_BINDING_VERSION"
     compile 'com.squareup.moshi:moshi:1.5.0'
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
 
     //Retrofit
     compile "com.squareup.retrofit2:retrofit:$RETROFIT_VERSION"

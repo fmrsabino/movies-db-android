@@ -4,8 +4,4 @@ import javax.inject.Scope
 
 @Scope
 @kotlin.annotation.Retention
-annotation class PerActivity
-
-@Scope
-@kotlin.annotation.Retention
-annotation class PerPresenter
+annotation class ForView
