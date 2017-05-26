@@ -11,7 +11,6 @@ import fmrsabino.moviesdb.ui.explore.ExploreContract
 @Component(dependencies = arrayOf(ApplicationComponent::class), modules = arrayOf(ViewModule::class))
 interface ViewComponent {
     fun inject(activity: ExploreActivity)
-    fun explorePresenter(): ExploreContract.Presenter
 
     fun dataManager(): DataManager
 }

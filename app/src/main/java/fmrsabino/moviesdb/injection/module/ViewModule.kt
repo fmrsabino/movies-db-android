@@ -7,6 +7,5 @@ import fmrsabino.moviesdb.ui.explore.ExplorePresenter
 
 @Module
 abstract class ViewModule {
-    @Binds
-    abstract fun providesExplorePresenter(explorePresenter: ExplorePresenter): ExploreContract.Presenter
+
 }

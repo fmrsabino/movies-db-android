@@ -12,10 +12,10 @@ class TrampolineSchedulerRule : TestRule {
         return object : Statement() {
             @Throws(Throwable::class)
             override fun evaluate() {
-                RxJavaPlugins.setIoSchedulerHandler { scheduler -> Schedulers.trampoline() }
-                RxJavaPlugins.setComputationSchedulerHandler { scheduler -> Schedulers.trampoline() }
-                RxJavaPlugins.setNewThreadSchedulerHandler { scheduler -> Schedulers.trampoline() }
-                RxAndroidPlugins.setInitMainThreadSchedulerHandler { scheduler -> Schedulers.trampoline() }
+                RxJavaPlugins.setIoSchedulerHandler { Schedulers.trampoline() }
+                RxJavaPlugins.setComputationSchedulerHandler { Schedulers.trampoline() }
+                RxJavaPlugins.setNewThreadSchedulerHandler { Schedulers.trampoline() }
+                RxAndroidPlugins.setInitMainThreadSchedulerHandler { Schedulers.trampoline() }
 
                 try {
                     base.evaluate()

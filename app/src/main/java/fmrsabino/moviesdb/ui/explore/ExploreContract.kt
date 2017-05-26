@@ -5,6 +5,7 @@ import io.reactivex.ObservableTransformer
 
 interface ExploreContract {
     interface Presenter {
+        var requested: Boolean
         val transformer: ObservableTransformer<UiEvent, ExploreUiModel>
     }
 }
