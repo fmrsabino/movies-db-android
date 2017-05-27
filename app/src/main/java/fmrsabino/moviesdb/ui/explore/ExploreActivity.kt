@@ -4,49 +4,57 @@ import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
+import fmrsabino.moviesdb.MoviesDbApplication
 import fmrsabino.moviesdb.R
+import fmrsabino.moviesdb.injection.component.DaggerViewComponent
 import fmrsabino.moviesdb.ui.base.uievents.RefreshEvent
-import fmrsabino.moviesdb.ui.base.uievents.UiEvent
-import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.subscribeBy
-import io.reactivex.subjects.PublishSubject
 import kotlinx.android.synthetic.main.activity_explore.*
 import timber.log.Timber
+import javax.inject.Inject
+
 
 class ExploreActivity : AppCompatActivity() {
+    @Inject lateinit var presenterFactory: ExplorePresenter.Companion.Factory
+    @Inject lateinit var adapter: ExploreAdapter
     lateinit var presenter: ExploreContract.Presenter
     var disposable: Disposable? = null
-    val refreshSubject: PublishSubject<UiEvent> = PublishSubject.create<UiEvent>()
-    val adapter = ExploreAdapter()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        presenter = ViewModelProviders.of(this).get(ExplorePresenter::class.java)
+        inject()
+        presenter = ViewModelProviders.of(this, presenterFactory).get(ExplorePresenter::class.java)
         setContentView(R.layout.activity_explore)
 
-        swipe_refresh.setOnRefreshListener { refreshSubject.onNext(RefreshEvent()) }
+        swipe_refresh.setOnRefreshListener { presenter.uiEvents.onNext(RefreshEvent()) }
         recycler_view.layoutManager = LinearLayoutManager(this)
         recycler_view.adapter = adapter
     }
 
     override fun onStart() {
         super.onStart()
-        val events: Observable<UiEvent> = refreshSubject
-        disposable = events.compose(presenter.transformer)
+        disposable = presenter.observeUiModel()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(onNext = { onUiModel(it) }, onError = { Timber.e(it) })
     }
 
     private fun onUiModel(uiModel: ExploreUiModel) {
         swipe_refresh.isRefreshing = uiModel.inProgress
-        if (!presenter.requested) refreshSubject.onNext(RefreshEvent())
+        if (!presenter.requested) presenter.uiEvents.onNext(RefreshEvent())
         adapter.onNewItems(uiModel.movies)
     }
 
     override fun onStop() {
         super.onStop()
         disposable?.dispose()
+    }
+
+    fun inject() {
+        DaggerViewComponent.builder()
+                .applicationComponent(MoviesDbApplication[this].component)
+                .build()
+                .inject(this)
     }
 }

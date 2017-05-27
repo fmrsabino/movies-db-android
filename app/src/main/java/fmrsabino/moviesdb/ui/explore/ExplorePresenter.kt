@@ -1,28 +1,25 @@
 package fmrsabino.moviesdb.ui.explore
 
-import android.app.Application
-import android.arch.lifecycle.AndroidViewModel
-import fmrsabino.moviesdb.MoviesDbApplication
+import android.arch.lifecycle.ViewModel
+import android.arch.lifecycle.ViewModelProvider
 import fmrsabino.moviesdb.data.DataManager
+import fmrsabino.moviesdb.injection.scope.ForView
 import fmrsabino.moviesdb.ui.base.results.Result
 import fmrsabino.moviesdb.ui.base.uievents.RefreshEvent
 import fmrsabino.moviesdb.ui.base.uievents.UiEvent
 import fmrsabino.moviesdb.ui.base.uievents.ViewActiveEvent
 import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
+import io.reactivex.subjects.PublishSubject
 import javax.inject.Inject
 
-class ExplorePresenter(application: Application) : AndroidViewModel(application), ExploreContract.Presenter {
-    @Inject lateinit var dataManager: DataManager
-
+class ExplorePresenter(dataManager: DataManager) : ViewModel(), ExploreContract.Presenter {
     var currentState = ExploreUiModel()
+    override val uiEvents: PublishSubject<UiEvent> = PublishSubject.create<UiEvent>()
     override var requested = false
 
-    init {
-        (application as MoviesDbApplication).component.inject(this)
-    }
 
-    override val transformer: ObservableTransformer<UiEvent, ExploreUiModel> = ObservableTransformer { events ->
+    private val transformer: ObservableTransformer<UiEvent, ExploreUiModel> = ObservableTransformer { events ->
         events.publish { shared ->
             Observable.merge(
                     shared.ofType(ViewActiveEvent::class.java).compose(refreshDataTransformer),
@@ -31,7 +28,7 @@ class ExplorePresenter(application: Application) : AndroidViewModel(application)
         }
     }
 
-    val refreshDataTransformer: ObservableTransformer<UiEvent, Result> = ObservableTransformer { events ->
+    private val refreshDataTransformer: ObservableTransformer<UiEvent, Result> = ObservableTransformer { events ->
         events.flatMap {
             dataManager.discoverMovies()
                     .doOnSubscribe { requested = true }
@@ -40,6 +37,10 @@ class ExplorePresenter(application: Application) : AndroidViewModel(application)
                     .startWith(DiscoverMoviesResult(inProgress = true))
         }
     }
+
+    private val uiModelObservable: Observable<ExploreUiModel> = uiEvents.compose(transformer).replay(1).autoConnect()
+
+    override fun observeUiModel() = uiModelObservable
 
     private fun stateReducer(previousState: ExploreUiModel, result: Result): ExploreUiModel {
         when (result) {
@@ -50,5 +51,16 @@ class ExplorePresenter(application: Application) : AndroidViewModel(application)
             }
         }
         return currentState
+    }
+
+    companion object {
+        @ForView
+        class Factory @Inject constructor(val dataManager: DataManager) : ViewModelProvider.Factory {
+            override fun <T : ViewModel?> create(modelClass: Class<T>?): T {
+                //This is ugly
+                @Suppress("UNCHECKED_CAST")
+                return ExplorePresenter(dataManager) as T
+            }
+        }
     }
 }
