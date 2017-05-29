@@ -10,7 +10,7 @@ android {
     defaultConfig {
         applicationId "fmrsabino.moviesdb"
         minSdkVersion 16
-        targetSdkVersion 'O'
+        targetSdkVersion 25
         versionCode 1
         versionName "1.0"
 
