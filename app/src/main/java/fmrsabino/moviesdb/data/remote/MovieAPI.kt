@@ -1,6 +1,7 @@
 package fmrsabino.moviesdb.data.remote
 
 import com.squareup.moshi.Moshi
+import fmrsabino.moviesdb.BuildConfig
 import fmrsabino.moviesdb.data.model.configuration.Configuration
 import fmrsabino.moviesdb.data.model.movie.Movie
 import fmrsabino.moviesdb.data.model.search.Search
@@ -59,7 +60,7 @@ interface MovieAPI {
                 return Interceptor {
                     var request = it.request()
                     val builder = request.url().newBuilder()
-                    val url = builder.addQueryParameter("api_key", Constants.API_KEY).build()
+                    val url = builder.addQueryParameter("api_key", BuildConfig.MOVIES_DB_API_KEY).build()
                     request = request.newBuilder().url(url).build()
                     it.proceed(request)
                 }

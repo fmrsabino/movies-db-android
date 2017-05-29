@@ -46,7 +46,7 @@ class ExplorePresenter(dataManager: DataManager) : ViewModel(), ExploreContract.
         when (result) {
             is DiscoverMoviesResult -> {
                 currentState = previousState.copy(
-                        movies = if (result.error != null) previousState.movies else result.movies,
+                        movies = if (result.inProgress || result.error != null) previousState.movies else result.movies,
                         inProgress = result.inProgress, error = result.error)
             }
         }

@@ -19,6 +19,9 @@ android {
     }
 
     buildTypes {
+        debug {
+            buildConfigField "String", "MOVIES_DB_API_KEY", getApiKey("MOVIES_DB_API_KEY")
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
@@ -32,6 +35,12 @@ android {
         //https://github.com/ReactiveX/RxJava/issues/4445
         exclude 'META-INF/rxjava.properties'
     }
+}
+
+def getApiKey(String property) {
+    Properties properties = new Properties()
+    properties.load(new FileInputStream("project_keys"))
+    return properties.getProperty(property)
 }
 
 kapt {
@@ -58,6 +67,7 @@ dependencies {
 
     compile "com.android.support:appcompat-v7:$SUPPORT_LIB_VERSION"
     compile "com.android.support:recyclerview-v7:$SUPPORT_LIB_VERSION"
+    compile "com.android.support:design:$SUPPORT_LIB_VERSION"
 
     compile "com.jakewharton.timber:timber:$TIMBER_VERSION"
 

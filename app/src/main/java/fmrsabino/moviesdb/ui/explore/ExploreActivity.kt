@@ -8,6 +8,7 @@ import fmrsabino.moviesdb.MoviesDbApplication
 import fmrsabino.moviesdb.R
 import fmrsabino.moviesdb.injection.component.DaggerViewComponent
 import fmrsabino.moviesdb.ui.base.uievents.RefreshEvent
+import fmrsabino.moviesdb.util.showSnackbar
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.subscribeBy
@@ -43,6 +44,10 @@ class ExploreActivity : AppCompatActivity() {
     private fun onUiModel(uiModel: ExploreUiModel) {
         swipe_refresh.isRefreshing = uiModel.inProgress
         if (!presenter.requested) presenter.uiEvents.onNext(RefreshEvent())
+        uiModel.error?.let {
+            Timber.e(it)
+            it.message?.let { coordinator.showSnackbar(it) }
+        }
         adapter.onNewItems(uiModel.movies)
     }
 
