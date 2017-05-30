@@ -6,3 +6,13 @@ import fmrsabino.moviesdb.ui.base.results.Result
 data class DiscoverMoviesResult(val movies: List<Network.Movie> = emptyList(),
                                 val inProgress: Boolean = false,
                                 val error: Throwable? = null) : Result
+
+data class DiscoverTvResult(val series: List<Network.TvSeries> = emptyList(),
+                            val inProgress: Boolean = false,
+                            val error: Throwable? = null) : Result
+
+
+data class ConfigurationResult(
+        val configuration: Network.Configuration? = null,
+        val inProgress: Boolean = false,
+        val error: Throwable? = null) : Result

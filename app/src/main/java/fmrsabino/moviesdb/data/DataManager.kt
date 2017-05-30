@@ -6,6 +6,7 @@ import fmrsabino.moviesdb.data.model.configuration.Image
 import fmrsabino.moviesdb.data.model.movie.Movie
 import fmrsabino.moviesdb.data.model.search.Search
 import fmrsabino.moviesdb.data.remote.MovieAPI
+import fmrsabino.moviesdb.data.remote.Network
 import io.reactivex.Observable
 import timber.log.Timber
 import javax.inject.Inject
@@ -15,6 +16,10 @@ import javax.inject.Singleton
 @Inject constructor(private val movieService: MovieAPI, private val databaseHelper: DatabaseHelper) {
     fun getRemoteConfiguration(): Observable<Configuration> {
         return movieService.getConfiguration()
+    }
+
+    fun getNewRemoteConfiguration(): Observable<Network.Configuration> {
+        return movieService.getConfigurationNew().doOnNext{Timber.d(it.toString())}
     }
 
     fun getRemoteSearch(query: String): Observable<Search> {
@@ -47,4 +52,6 @@ import javax.inject.Singleton
     fun getRemoteMovie(id: String) = movieService.getMovie(id)
 
     fun discoverMovies() = movieService.discoverMovies().map { it.results }
+
+    fun discoverTv() = movieService.discoverTv().map { it.results }
 }

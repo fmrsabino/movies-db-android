@@ -50,6 +50,7 @@ kapt {
 dependencies {
     final SUPPORT_LIB_VERSION = '26.0.0-beta1'
 
+    final MOSHI_VERSION = '1.4.0'
     final TIMBER_VERSION = '4.5.1'
     final RETROFIT_VERSION = '2.3.0'
     final RX_ANDROID_VERSION = '2.0.1'
@@ -72,7 +73,8 @@ dependencies {
     compile "com.jakewharton.timber:timber:$TIMBER_VERSION"
 
     compile "com.jakewharton.rxbinding2:rxbinding-kotlin:$RX_BINDING_VERSION"
-    compile 'com.squareup.moshi:moshi:1.5.0'
+    compile "com.squareup.moshi:moshi:$MOSHI_VERSION"
+    //compile "com.squareup.moshi:moshi-kotlin:$MOSHI_VERSION" https://github.com/square/moshi/issues/309
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
 
     //Retrofit
