@@ -20,7 +20,7 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField "String", "MOVIES_DB_API_KEY", getApiKey("MOVIES_DB_API_KEY")
+            buildConfigField "String", "MOVIES_DB_API_KEY", getKey("MOVIES_DB_API_KEY")
         }
         release {
             minifyEnabled false
@@ -37,7 +37,7 @@ android {
     }
 }
 
-def getApiKey(String property) {
+def getKey(String property) {
     Properties properties = new Properties()
     properties.load(new FileInputStream("project_keys"))
     return properties.getProperty(property)
