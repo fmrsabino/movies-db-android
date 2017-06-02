@@ -25,7 +25,8 @@
                 android:drawableLeft="@drawable/ic_search_black_24dp"
                 android:gravity="center"
                 android:hint="Search Movies and TV Shows"
-                android:padding="8dp"
+                android:padding="12dp"
+                android:elevation="4dp"
                 android:textColor="@color/colorBackground" />
 
             <LinearLayout
