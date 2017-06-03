@@ -42,8 +42,8 @@ class ExplorePresenter(val dataManager: DataManager) : ViewModel(), ExploreContr
 
     private val configurationTransformer: ObservableTransformer<UiEvent, Result> = ObservableTransformer { events ->
         events.flatMap {
-            dataManager.getNewRemoteConfiguration()
-                    .map { ConfigurationResult(configuration = it) }
+            dataManager.getConfiguration()
+                    .map { ConfigurationResult(imageConfiguration = it) }
                     .onErrorReturn { ConfigurationResult(error = it) }
                     .startWith(ConfigurationResult(inProgress = true))
         }
@@ -72,7 +72,7 @@ class ExplorePresenter(val dataManager: DataManager) : ViewModel(), ExploreContr
             }
             is ConfigurationResult -> {
                 currentState = previousState.copy(
-                        configuration = result.configuration?.images,
+                        configuration = result.imageConfiguration,
                         configurationInProgress = result.inProgress)
             }
             is DiscoverTvResult -> {

@@ -1,5 +1,6 @@
 package fmrsabino.moviesdb.ui.explore
 
+import fmrsabino.moviesdb.data.model.ImageConfiguration
 import fmrsabino.moviesdb.data.remote.Network
 
 data class ExploreUiModel(val movies: List<Network.Movie> = emptyList(),
@@ -10,4 +11,4 @@ data class ExploreUiModel(val movies: List<Network.Movie> = emptyList(),
                           val discoverMoviesError: Throwable? = null,
                           val discoverTvError: Throwable? = null,
                           val configurationError: Throwable? = null,
-                          val configuration: Network.ImageConfiguration? = null)
+                          val configuration: ImageConfiguration? = null)

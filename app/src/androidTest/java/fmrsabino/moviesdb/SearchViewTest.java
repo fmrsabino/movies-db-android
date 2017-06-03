@@ -1,26 +1,9 @@
 package fmrsabino.moviesdb;
 
 import android.support.test.InstrumentationRegistry;
-import android.support.test.espresso.contrib.RecyclerViewActions;
-import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 
-import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import fmrsabino.moviesdb.data.model.search.Result;
-import fmrsabino.moviesdb.data.model.search.Search;
-import fmrsabino.moviesdb.ui.search.SearchView;
-
-import static android.support.test.espresso.Espresso.onView;
-import static android.support.test.espresso.action.ViewActions.typeText;
-import static android.support.test.espresso.assertion.ViewAssertions.matches;
-import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
-import static android.support.test.espresso.matcher.ViewMatchers.withId;
-import static android.support.test.espresso.matcher.ViewMatchers.withText;
 
 @RunWith(AndroidJUnit4.class)
 public class SearchViewTest {

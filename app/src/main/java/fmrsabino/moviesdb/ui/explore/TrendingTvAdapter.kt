@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.squareup.picasso.Picasso
 import fmrsabino.moviesdb.R
+import fmrsabino.moviesdb.data.model.ImageConfiguration
 import fmrsabino.moviesdb.data.remote.Network
 import fmrsabino.moviesdb.injection.scope.ForView
 import kotlinx.android.synthetic.main.explore_item.view.*
@@ -15,7 +16,7 @@ import javax.inject.Inject
 @ForView
 class TrendingTvAdapter @Inject constructor(val picasso: Picasso) : RecyclerView.Adapter<TrendingTvAdapter.ViewHolder>() {
     val items: MutableList<Network.TvSeries> = mutableListOf()
-    var imageConfiguration: Network.ImageConfiguration? = null
+    var imageConfiguration: ImageConfiguration? = null
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) = holder.bind(items[position])
 
@@ -33,7 +34,7 @@ class TrendingTvAdapter @Inject constructor(val picasso: Picasso) : RecyclerView
         }
     }
 
-    fun onNewConfiguration(imageConfiguration: Network.ImageConfiguration?) {
+    fun onNewConfiguration(imageConfiguration: ImageConfiguration?) {
         this.imageConfiguration = imageConfiguration
         imageConfiguration?.let {
             Timber.d(it.posterSizes.toString())

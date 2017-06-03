@@ -4,14 +4,14 @@ import com.squareup.moshi.Json
 import org.threeten.bp.LocalDate
 
 object Network {
-    data class Movie(val id: String,
+    data class Movie(@Json(name = "id") val id: String,
                      @Json(name = "backdrop_path") val backdropPath: String? = null,
                      @Json(name = "poster_path") val posterPath: String? = null,
                      @Json(name = "release_date") val releaseDate: LocalDate? = null,
                      @Json(name = "imdb_id") val imdbId: String? = null,
-                     val title: String? = null,
-                     val tagline: String? = null,
-                     val overview: String? = null)
+                     @Json(name = "title") val title: String? = null,
+                     @Json(name = "tagline") val tagline: String? = null,
+                     @Json(name = "overview") val overview: String? = null)
 
     data class TvSeries(@Json(name = "id") val id: String,
                         @Json(name = "poster_path") val posterPath: String? = null,
