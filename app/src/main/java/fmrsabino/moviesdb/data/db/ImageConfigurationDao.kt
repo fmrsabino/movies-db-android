@@ -11,6 +11,6 @@ interface ImageConfigurationDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertImageConfiguration(imageConfiguration: Db.ImageConfiguration)
 
-    @Query("SELECT * FROM image_configuration LIMIT 1")
+    @Query("SELECT * FROM ${Db.ImageConfiguration.TABLE_NAME} LIMIT 1")
     fun getImageConfiguration(): Flowable<Db.ImageConfiguration>
 }
