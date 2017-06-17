@@ -15,12 +15,8 @@ This is a sample kotlin project to showcase a demo MVP Android project. It shows
 * Espresso (Android UI tests)
 
 ## Setup
-This application uses [The Movie DB API](https://www.themoviedb.org/documentation/api?language=en). You need to obtain an API key for the application before using it. Put your API key in [Constants.java](https://github.com/fmrsabino/movies-db-android/blob/master/app/src/main/java/fmrsabino/moviesdb/util/Constants.java)
+This application uses [The Movie DB API](https://www.themoviedb.org/documentation/api?language=en). You need to obtain an API key for the application before using it.
+Create a file named `project-keys` with the following line `MOVIES_DB_API_KEY = "<YOUR_API_KEY>"`
 
-## MVP
-This project follows the Model-View-Presenter architecture. You can read more about it [here](https://github.com/ribot/android-guidelines/blob/master/architecture_guidelines/android_architecture.md).
-
-I've used the Loaders provided by the Android SDK for the presenters because they survive configuration changes. You can read more about it [here](https://medium.com/google-developers/making-loading-data-on-android-lifecycle-aware-897e12760832#.c81zmpcjd).
-
-## Notes
-The `RxSchedulersOverrideRule` is from this [project](https://github.com/ribot/android-boilerplate/blob/master/app/src/test/java/uk/co/ribot/androidboilerplate/util/RxSchedulersOverrideRule.java).
+## MVP/MVI
+This project follows the Model-View-Presenter/Model-View-Intent architecture. You can read more about it [here](https://medium.com/@fmrsabino/an-approach-to-mvp-mvi-with-dagger-2-part-1-viewmodel-is-here-bdfc09c8732).
