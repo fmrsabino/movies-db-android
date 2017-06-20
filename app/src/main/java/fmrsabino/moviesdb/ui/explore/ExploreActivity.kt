@@ -9,6 +9,7 @@ import android.view.View
 import fmrsabino.moviesdb.MoviesDbApplication
 import fmrsabino.moviesdb.R
 import fmrsabino.moviesdb.injection.component.DaggerViewComponent
+import fmrsabino.moviesdb.injection.module.ViewModule
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.subscribeBy
@@ -42,11 +43,10 @@ class ExploreActivity : AppCompatActivity() {
         super.onStart()
         disposable = presenter.observeUiModel()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(onNext = { onUiModel(it) }, onError = { Timber.e(it) })
+                .subscribeBy(onNext = this::onUiModel, onError = Timber::e)
     }
 
     private fun onUiModel(uiModel: ExploreUiModel) {
-        presenter.initialRequest()
         moviesAdapter.onNewConfiguration(uiModel.configuration)
         moviesAdapter.onNewItems(uiModel.movies)
         tvAdapter.onNewConfiguration(uiModel.configuration)
@@ -70,6 +70,7 @@ class ExploreActivity : AppCompatActivity() {
 
     fun inject() {
         DaggerViewComponent.builder()
+                .viewModule(ViewModule(this))
                 .applicationComponent(MoviesDbApplication[this].component)
                 .build()
                 .inject(this)

@@ -1,9 +1,7 @@
 package fmrsabino.moviesdb.data
 
 import fmrsabino.moviesdb.data.db.MoviesDb
-import fmrsabino.moviesdb.data.model.ImageConfiguration
-import fmrsabino.moviesdb.data.model.fromDb
-import fmrsabino.moviesdb.data.model.toDb
+import fmrsabino.moviesdb.data.model.*
 import fmrsabino.moviesdb.data.remote.MovieAPI
 import io.reactivex.Observable
 import javax.inject.Inject
@@ -22,7 +20,7 @@ import javax.inject.Singleton
                 }
     }
 
-    fun getRemoteMovie(id: String) = movieService.getMovie(id)
+    fun getMovie(id: Int): Observable<Movie> = movieService.getMovie(id).map { it.fromNetwork() }
 
     fun discoverMovies() = movieService.discoverMovies().map { it.results }
 

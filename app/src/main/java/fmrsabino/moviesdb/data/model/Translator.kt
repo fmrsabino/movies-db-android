@@ -26,3 +26,6 @@ fun ImageConfiguration.toDb(): Db.ImageConfiguration {
     dbModel.logoSizes = logoSizes
     return dbModel
 }
+
+fun Network.Movie.fromNetwork(): Movie =
+        Movie(id, backdropPath, posterPath, releaseDate, imdbId, title, tagline, overview)

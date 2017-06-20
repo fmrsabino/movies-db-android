@@ -8,6 +8,5 @@ interface ExploreContract {
     interface Presenter {
         val uiEvents: Subject<UiEvent>
         fun observeUiModel(): Observable<ExploreUiModel>
-        fun initialRequest()
     }
 }

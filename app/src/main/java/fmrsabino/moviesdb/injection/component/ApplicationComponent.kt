@@ -7,7 +7,6 @@ import dagger.Component
 import fmrsabino.moviesdb.data.DataManager
 import fmrsabino.moviesdb.injection.module.ApplicationModule
 import fmrsabino.moviesdb.injection.scope.ApplicationContext
-import fmrsabino.moviesdb.ui.explore.ExplorePresenter
 import javax.inject.Singleton
 
 @Singleton
@@ -17,6 +16,4 @@ interface ApplicationComponent {
     @ApplicationContext fun context(): Context
     fun dataManager(): DataManager
     fun picasso(): Picasso
-
-    fun inject(explorePresenter: ExplorePresenter)
 }

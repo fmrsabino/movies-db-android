@@ -4,7 +4,7 @@ import com.squareup.moshi.Json
 import org.threeten.bp.LocalDate
 
 object Network {
-    data class Movie(@Json(name = "id") val id: String,
+    data class Movie(@Json(name = "id") val id: Int,
                      @Json(name = "backdrop_path") val backdropPath: String? = null,
                      @Json(name = "poster_path") val posterPath: String? = null,
                      @Json(name = "release_date") val releaseDate: LocalDate? = null,
@@ -19,9 +19,7 @@ object Network {
 
     data class PaginatedResponse<out T>(val page: Int, val results: List<T>)
 
-    data class Configuration(
-            @Json(name = "images") val images: ImageConfiguration?
-    )
+    data class Configuration(@Json(name = "images") val images: ImageConfiguration?)
 
     data class ImageConfiguration(
             @Json(name = "base_url") val baseUrl: String? = null,

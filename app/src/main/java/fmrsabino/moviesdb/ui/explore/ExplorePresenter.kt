@@ -10,25 +10,26 @@ import fmrsabino.moviesdb.ui.base.uievents.UiEvent
 import fmrsabino.moviesdb.util.debounceExceptFirst
 import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
-import io.reactivex.subjects.PublishSubject
+import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.Subject
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class ExplorePresenter(val dataManager: DataManager) : ViewModel(), ExploreContract.Presenter {
     private var currentState = ExploreUiModel()
-    private var shouldRequest = true
-    override val uiEvents: Subject<UiEvent> = PublishSubject.create<UiEvent>()
+    override val uiEvents: Subject<UiEvent> = BehaviorSubject.create<UiEvent>()
+
+    init {
+        uiEvents.onNext(RefreshEvent())
+    }
 
     private val transformer: ObservableTransformer<UiEvent, ExploreUiModel> = ObservableTransformer { events ->
         events.publish { shared ->
-            shared.ofType(RefreshEvent::class.java).publish { shared ->
-                Observable.merge(
-                        shared.compose(discoverTvTransformer),
-                        shared.compose(configurationTransformer),
-                        shared.compose(discoverMoviesTransformer))
-            }.scan(currentState, { previous, result -> stateReducer(previous, result) })
-        }
+            Observable.merge(
+                    shared.ofType(RefreshEvent::class.java).compose(discoverTvTransformer),
+                    shared.ofType(RefreshEvent::class.java).compose(configurationTransformer),
+                    shared.ofType(RefreshEvent::class.java).compose(discoverMoviesTransformer))
+        }.scan(currentState, { previous, result -> stateReducer(previous, result) })
     }
 
     private val discoverMoviesTransformer: ObservableTransformer<UiEvent, Result> = ObservableTransformer { events ->
@@ -82,13 +83,6 @@ class ExplorePresenter(val dataManager: DataManager) : ViewModel(), ExploreContr
             }
         }
         return currentState
-    }
-
-    override fun initialRequest() {
-        if (shouldRequest) {
-            shouldRequest = false
-            uiEvents.onNext(RefreshEvent())
-        }
     }
 
     companion object {
