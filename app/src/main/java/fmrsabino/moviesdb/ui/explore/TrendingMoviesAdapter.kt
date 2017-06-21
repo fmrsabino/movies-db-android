@@ -46,6 +46,7 @@ class TrendingMoviesAdapter @Inject constructor(val picasso: Picasso, @ActivityC
             val movie = items[adapterPosition]
             val intent = Intent(context, DetailActivity::class.java)
             intent.putExtra(DetailActivity.MOVIE_ID_KEY, movie.id)
+            intent.putExtra(DetailActivity.MOVIE_TITLE_KEY, movie.title)
             context.startActivity(intent)
         }
     }

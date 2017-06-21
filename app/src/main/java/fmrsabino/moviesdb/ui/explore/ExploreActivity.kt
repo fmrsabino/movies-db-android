@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.LinearSnapHelper
 import android.view.View
+import android.view.ViewTreeObserver
 import fmrsabino.moviesdb.MoviesDbApplication
 import fmrsabino.moviesdb.R
 import fmrsabino.moviesdb.injection.component.DaggerViewComponent
@@ -18,7 +19,7 @@ import timber.log.Timber
 import javax.inject.Inject
 
 
-class ExploreActivity : AppCompatActivity() {
+class ExploreActivity : AppCompatActivity(), ViewTreeObserver.OnGlobalLayoutListener {
     @Inject lateinit var presenterFactory: ExplorePresenter.Companion.Factory
     @Inject lateinit var moviesAdapter: TrendingMoviesAdapter
     @Inject lateinit var tvAdapter: TrendingTvAdapter
@@ -31,12 +32,21 @@ class ExploreActivity : AppCompatActivity() {
         presenter = ViewModelProviders.of(this, presenterFactory).get(ExplorePresenter::class.java)
         setContentView(R.layout.activity_explore)
 
+        nested_scroll.viewTreeObserver.addOnGlobalLayoutListener(this)
+
         discover_movies_list.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         discover_movies_list.adapter = moviesAdapter
         discover_tv_list.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         discover_tv_list.adapter = tvAdapter
         LinearSnapHelper().attachToRecyclerView(discover_movies_list)
         LinearSnapHelper().attachToRecyclerView(discover_tv_list)
+    }
+
+    override fun onGlobalLayout() {
+        nested_scroll.viewTreeObserver.removeOnGlobalLayoutListener(this)
+        val appBarHeight = app_bar.height
+        nested_scroll.translationY = -appBarHeight.toFloat()
+        nested_scroll.layoutParams.height = nested_scroll.height + appBarHeight
     }
 
     override fun onStart() {
